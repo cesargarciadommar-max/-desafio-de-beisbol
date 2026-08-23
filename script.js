@@ -525,6 +525,45 @@ botonGuardar.style.marginTop = "15px";
 
 contenedor.appendChild(botonGuardar);
 }
+async function obtenerHoraCierreRoster() {
+  try {
+    const manana = new Date();
+    manana.setDate(manana.getDate() + 1);
+
+    const fechaManana =
+      manana.getFullYear() + "-" +
+      String(manana.getMonth() + 1).padStart(2, "0") + "-" +
+      String(manana.getDate()).padStart(2, "0");
+
+    const respuesta = await fetch(
+      `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${fechaManana}`
+    );
+
+    const datos = await respuesta.json();
+
+    const juegos = datos.dates?.[0]?.games || [];
+
+    if (juegos.length === 0) {
+      return null;
+    }
+
+    const horas = juegos
+      .map(juego => new Date(juego.gameDate))
+      .sort((a, b) => a - b);
+
+    const primerJuego = horas[0];
+
+    const horaCierre = new Date(
+      primerJuego.getTime() - 60 * 60 * 1000
+    );
+
+    return horaCierre;
+
+  } catch (error) {
+    console.error("Error obteniendo hora de cierre:", error);
+    return null;
+  }
+}
 async function guardarRoster() {
   const horaCierre = await obtenerHoraCierreRoster();
 const ahora = new Date();
