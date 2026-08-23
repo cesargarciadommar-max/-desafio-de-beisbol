@@ -879,7 +879,7 @@ async function unirseGrupo() {
 // MOSTRAR RANKING
 // ----------------------------------------
 
-function mostrarRanking() {
+async function mostrarRanking() {
   const ranking = document.getElementById("ranking");
 
   if (!ranking) {
@@ -888,11 +888,19 @@ function mostrarRanking() {
 
   let participantes = [];
 
-  grupos.forEach((grupo) => {
-    participantes = participantes.concat(
-      grupo.participantes
-    );
-  });
+for (const grupo of grupos) {
+  const { data, error } = await supabaseClient
+    .from("participantes")
+    .select("nombre, puntos")
+    .eq("grupo_id", grupo.id);
+
+  if (error) {
+    console.error("Error cargando ranking:", error);
+    continue;
+  }
+
+  participantes = participantes.concat(data || []);
+}
 
   participantes.sort((a, b) => b.puntos - a.puntos);
 
