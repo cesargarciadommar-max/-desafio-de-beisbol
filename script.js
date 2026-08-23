@@ -956,7 +956,7 @@ document.addEventListener("DOMContentLoaded", () => {
   mostrarRanking();
 
   const hoy = new Date();
-hoy.setDate(hoy.getDate() - 1);
+
 
 const fechaHoy =
   hoy.getFullYear() + "-" +
