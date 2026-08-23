@@ -737,7 +737,7 @@ function crearGrupo() {
     clave
   );
 }
-function mostrarGrupos() {
+async function mostrarGrupos() {
   const seccion = document.querySelector("section:nth-of-type(2)");
 
   if (!seccion) return;
@@ -756,18 +756,48 @@ function mostrarGrupos() {
     return;
   }
 
-  contenedor.innerHTML = grupos.map(grupo => `
-    <div style="
-      margin-top:15px;
-      padding:15px;
-      border:1px solid #2b4a68;
-      border-radius:12px;
-    ">
-      <strong>${grupo.nombre}</strong><br>
-      🔑 Clave: ${grupo.clave}<br>
-      👥 Participantes: ${grupo.participantes.length}
-    </div>
-  `).join("");
+  const gruposActualizados = await Promise.all(
+    grupos.map(async (grupo) => {
+      const { data: participantes, error } = await supabaseClient
+        .from("participantes")
+        .select("id, nombre, puntos")
+        .eq("grupo_id", grupo.id);
+
+      if (error) {
+        console.error("Error cargando participantes:", error);
+
+        return {
+          ...grupo,
+          participantes: grupo.participantes || []
+        };
+      }
+
+      return {
+        ...grupo,
+        participantes: participantes || []
+      };
+    })
+  );
+
+  grupos = gruposActualizados;
+  guardarDatos();
+
+  contenedor.innerHTML = gruposActualizados
+    .map(
+      (grupo) => `
+        <div style="
+          margin-top:15px;
+          padding:15px;
+          border:1px solid #2b4a68;
+          border-radius:12px;
+        ">
+          <strong>${grupo.nombre}</strong><br>
+          🔑 Clave: ${grupo.clave}<br>
+          👥 Participantes: ${grupo.participantes.length}
+        </div>
+      `
+    )
+    .join("");
 }
 // ----------------------------------------
 // UNIRSE A UN GRUPO
