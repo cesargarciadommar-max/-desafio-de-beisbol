@@ -773,18 +773,25 @@ function mostrarGrupos() {
 // UNIRSE A UN GRUPO
 // ----------------------------------------
 
-function unirseGrupo() {
+async function unirseGrupo() {
   const clave = prompt("Escribe la clave del grupo:");
 
   if (!clave) {
     return;
   }
 
-  const grupo = grupos.find(
-    (grupoActual) => grupoActual.clave === clave
-  );
+  const claveLimpia = clave.trim().toUpperCase();
 
-  if (!grupo) {
+  // Buscar el grupo en Supabase
+  const { data: grupoEncontrado, error: errorGrupo } =
+    await supabaseClient
+      .from("grupos")
+      .select("*")
+      .eq("clave", claveLimpia)
+      .single();
+
+  if (errorGrupo || !grupoEncontrado) {
+    console.error(errorGrupo);
     alert("No existe ningún grupo con esa clave.");
     return;
   }
@@ -795,16 +802,47 @@ function unirseGrupo() {
     return;
   }
 
-  grupo.participantes.push({
-    nombre: nombre,
-    puntos: 0
-  });
+  // Agregar participante en Supabase
+  const { error: errorParticipante } = await supabaseClient
+    .from("participantes")
+    .insert({
+      grupo_id: grupoEncontrado.id,
+      nombre: nombre.trim(),
+      puntos: 0
+    });
+
+  if (errorParticipante) {
+    console.error(errorParticipante);
+    alert("No se pudo unir al grupo.");
+    return;
+  }
+
+  // Guardarlo localmente para mostrarlo en este dispositivo
+  const grupoLocal = {
+    id: grupoEncontrado.id,
+    nombre: grupoEncontrado.nombre,
+    clave: grupoEncontrado.clave,
+    participantes: [
+      {
+        nombre: nombre.trim(),
+        puntos: 0
+      }
+    ]
+  };
+
+  const yaExiste = grupos.some(
+    (grupoActual) => grupoActual.id === grupoEncontrado.id
+  );
+
+  if (!yaExiste) {
+    grupos.push(grupoLocal);
+  }
 
   guardarDatos();
-
-  alert("Te uniste al grupo " + grupo.nombre);
-
+  mostrarGrupos();
   mostrarRanking();
+
+  alert("Te uniste al grupo " + grupoEncontrado.nombre);
 }
 
 // ----------------------------------------
