@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#071426">
+
+  <title>Desafío de Béisbol</title>
+
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+  <header>
+    <h1>⚾ Desafío de Béisbol</h1>
+    <p>Temporada MLB</p>
+  </header>
+
+  <main>
+
+    <section>
+      <h2>Mi equipo</h2>
+      <p>Selecciona tus jugadores y compite cada día.</p>
+
+      <button id="btnEquipo">
+        Seleccionar jugadores
+      </button>
+      <div id="equipo"></div>
+      <div id="alineacionGuardada" style="display:none;">
+        <h3 id="tituloAlineacion">Mi alineación de hoy</h3>
+        <div id="listaAlineacion"></div>
+        <button id="btnEditarAlineacion" onclick="editarAlineacion()">
+          ✏️ Editar alineación
+        </button>
+      </div>
+      <div id="presupuesto">
+        <strong>Presupuesto</strong><br>
+        Tope: $50.0 M<br>
+        Gastado: $0.0 M<br>
+        Disponible: $50.0 M
+      </div>
+    </section>
+
+    <section>
+      <h2>Mis grupos</h2>
+      <p>Compite contra tus amigos.</p>
+
+      <button id="btnCrearGrupo">
+        Crear grupo
+      </button>
+
+      <button id="btnUnirseGrupo">
+        Unirme con una clave
+      </button>
+    </section>
+
+    <section>
+      <h2>Puntuación de hoy</h2>
+
+      <div id="puntuacion">
+        0 puntos
+      </div>
+    </section>
+
+    <section>
+      <h2>Clasificación</h2>
+
+      <div id="ranking">
+        Todavía no hay participantes.
+      </div>
+    </section>
+
+  </main>
+
+  <nav>
+    <button>⚾ Equipo</button>
+    <button>🏆 Ranking</button>
+    <button>👥 Grupos</button>
+  </nav>
+
+  <script src="script.js"></script>
+
+</body>
+</html>
