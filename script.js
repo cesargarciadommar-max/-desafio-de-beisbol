@@ -612,7 +612,9 @@ if (horaCierre && ahora >= horaCierre) {
     "rosterOficial",
     JSON.stringify(equipo)
   );
-  const fechaRoster = new Date().toISOString().split("T")[0];
+  const fechaRosterObj = new Date();
+fechaRosterObj.setDate(fechaRosterObj.getDate() + 1);
+const fechaRoster = fechaRosterObj.toISOString().split("T")[0];
 
   localStorage.setItem(
     "fechaRosterOficial",
