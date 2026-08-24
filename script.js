@@ -1006,15 +1006,11 @@ document.addEventListener("DOMContentLoaded", () => {
   mostrarEquipo();
   mostrarRanking();
 
-  const hoy = new Date();
+  const fechaRoster = localStorage.getItem("fechaRosterOficial");
 
-
-const fechaHoy =
-  hoy.getFullYear() + "-" +
-  String(hoy.getMonth() + 1).padStart(2, "0") + "-" +
-  String(hoy.getDate()).padStart(2, "0");
-
-actualizarPuntosEquipo(fechaHoy);
+if (fechaRoster) {
+  actualizarPuntosEquipo(fechaRoster);
+}
 });
 async function calcularSalarioPitcheo(teamId) {
   try {
