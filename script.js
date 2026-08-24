@@ -527,6 +527,7 @@ contenedor.appendChild(botonGuardar);
 }
 async function obtenerHoraCierreRoster() {
   try {
+    // El roster que armamos hoy corresponde a los juegos de mañana.
     const manana = new Date();
     manana.setDate(manana.getDate() + 1);
 
@@ -539,25 +540,34 @@ async function obtenerHoraCierreRoster() {
       `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${fechaManana}`
     );
 
-    const datos = await respuesta.json();
+    if (!respuesta.ok) {
+      throw new Error("No se pudo obtener el calendario MLB");
+    }
 
+    const datos = await respuesta.json();
     const juegos = datos.dates?.[0]?.games || [];
 
     if (juegos.length === 0) {
       return null;
     }
 
+    // Las horas de MLB vienen en UTC.
+    // new Date(gameDate) las convierte correctamente a la hora del dispositivo.
     const horas = juegos
       .map(juego => new Date(juego.gameDate))
-      .sort((a, b) => a - b);
+      .filter(fecha => !isNaN(fecha.getTime()))
+      .sort((a, b) => a.getTime() - b.getTime());
+
+    if (horas.length === 0) {
+      return null;
+    }
 
     const primerJuego = horas[0];
 
-    const horaCierre = new Date(
+    // Cierre exactamente 1 hora antes del primer juego.
+    return new Date(
       primerJuego.getTime() - 60 * 60 * 1000
     );
-
-    return horaCierre;
 
   } catch (error) {
     console.error("Error obteniendo hora de cierre:", error);
