@@ -352,7 +352,8 @@ function calcularPuntosPitcheo(stats, gano) {
   puntos -= (stats.baseOnBalls || 0) * 1;
   puntos -= (stats.earnedRuns || 0) * 3;
 
-  puntos += gano ? 5 : -5;
+  if (gano === true) puntos += 5;
+if (gano === false) puntos -= 5;
 
   return puntos;
 }
@@ -468,7 +469,7 @@ async function obtenerPuntosPitcheoEquipo(teamId, fecha) {
     }
 
     // 5. La victoria solo se aplica cuando el juego terminó
-    let gano = false;
+    let gano = null;
 
     if (juego.status?.abstractGameState === "Final") {
       const carrerasLocal = juego.teams?.home?.score ?? 0;
