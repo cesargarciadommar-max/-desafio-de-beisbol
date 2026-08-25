@@ -431,29 +431,58 @@ async function obtenerPromedioUltimos10(playerId) {
 
 async function obtenerPuntosPitcheoEquipo(teamId, fecha) {
   try {
-    const respuesta = await fetch(
-      `https://statsapi.mlb.com/api/v1/teams/${teamId}/stats?stats=gameLog&group=pitching&season=2026`
+    // 1. Buscar el juego del equipo en la fecha indicada
+    const respuestaSchedule = await fetch(
+      `https://statsapi.mlb.com/api/v1/schedule?sportId=1&teamId=${teamId}&date=${fecha}`
     );
 
-    const datos = await respuesta.json();
-    const splits = datos.stats?.[0]?.splits || [];
+    const datosSchedule = await respuestaSchedule.json();
 
-    const juego = splits.find(item => item.date === fecha);
+    const juego = datosSchedule.dates?.[0]?.games?.[0];
 
     if (!juego) {
       return 0;
     }
 
-    const stats = juego.stat;
+    const gamePk = juego.gamePk;
 
-    const gano =
-      juego.isWin === true ||
-      juego.isWin === "true";
+    // 2. Obtener boxscore EN VIVO
+    const respuestaBoxscore = await fetch(
+      `https://statsapi.mlb.com/api/v1/game/${gamePk}/boxscore`
+    );
+
+    const boxscore = await respuestaBoxscore.json();
+
+    // 3. Saber si nuestro equipo es local o visitante
+    const esLocal =
+      juego.teams?.home?.team?.id === Number(teamId);
+
+    const lado = esLocal ? "home" : "away";
+
+    // 4. Estadísticas acumuladas de TODO el pitcheo del equipo
+    const stats =
+      boxscore.teams?.[lado]?.teamStats?.pitching;
+
+    if (!stats) {
+      return 0;
+    }
+
+    // 5. La victoria solo se aplica cuando el juego terminó
+    let gano = false;
+
+    if (juego.status?.abstractGameState === "Final") {
+      const carrerasLocal = juego.teams?.home?.score ?? 0;
+      const carrerasVisitante = juego.teams?.away?.score ?? 0;
+
+      gano = esLocal
+        ? carrerasLocal > carrerasVisitante
+        : carrerasVisitante > carrerasLocal;
+    }
 
     return calcularPuntosPitcheo(stats, gano);
 
   } catch (error) {
-    console.error("Error obteniendo puntos de pitcheo:", error);
+    console.error("Error obteniendo puntos de pitcheo en vivo:", error);
     return 0;
   }
 }
