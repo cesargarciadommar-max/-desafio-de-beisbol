@@ -1191,16 +1191,3 @@ async function obtenerHoraPrimerJuegoMLB() {
     return null;
   }
 }
-async function obtenerHoraCierreRoster() {
-  const primerJuego = await obtenerHoraPrimerJuegoMLB();
-
-  if (!primerJuego) {
-    return null;
-  }
-
-  const horaCierre = new Date(
-    primerJuego.getTime() - 60 * 60 * 1000
-  );
-
-  return horaCierre;
-}
